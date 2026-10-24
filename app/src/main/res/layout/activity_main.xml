@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnScan"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Сканировать" />
+
+        <Button
+            android:id="@+id/btnDisconnect"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="Отключить" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Статус: ожидание"
+        android:textStyle="bold" />
+
+    <!-- Две вкладки: "Диагностика" (всё, что было раньше — скан, рукопожатие,
+         ручные команды, сырой лог) и "Приборная панель" (крупно скорость,
+         батарея, остаток хода). Переключаются кодом в MainActivity.kt. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnTabDiag"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Диагностика" />
+
+        <Button
+            android:id="@+id/btnTabDash"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Приборная панель" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp">
+
+        <!-- ======================= ВКЛАДКА 1: ДИАГНОСТИКА ======================= -->
+        <LinearLayout
+            android:id="@+id/tabDiagnostics"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <!-- Фиксированная высота: список устройств должен быть виден всегда. -->
+            <ListView
+                android:id="@+id/listDevices"
+                android:layout_width="match_parent"
+                android:layout_height="160dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#CCCCCC"
+                android:layout_marginVertical="8dp" />
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Режим ключа (mode):" />
+
+                    <RadioGroup
+                        android:id="@+id/radioMode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <RadioButton
+                            android:id="@+id/radioMode1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="1" />
+
+                        <RadioButton
+                            android:id="@+id/radioMode2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="2" />
+
+                        <RadioButton
+                            android:id="@+id/radioMode3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="3" />
+
+                        <CheckBox
+                            android:id="@+id/checkAutoReply"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="Авто-рукопожатие +VER/+PM/+PA" />
+                    </RadioGroup>
+
+                    <Button
+                        android:id="@+id/btnHandshake"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Запустить рукопожатие заново (+VER?)" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#CCCCCC"
+                        android:layout_marginVertical="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Телеметрия (разобранные поля +XXX=значение):"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvTelemetry"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:fontFamily="monospace"
+                        android:textIsSelectable="true"
+                        android:textSize="12sp"
+                        android:text="(пока нет данных — подключись и дождись рукопожатия)" />
+
+                    <CheckBox
+                        android:id="@+id/checkBinaryLight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Бинарный протокол света (AA..BB, для kgkrn02/b1/b2/kug.. и т.п.)" />
+
+                    <GridLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:columnCount="2"
+                        android:layout_marginTop="4dp">
+
+                        <Button android:id="@+id/btnLock" android:text="Заблокировать"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_columnWeight="1" />
+                        <Button android:id="@+id/btnUnlock" android:text="Разблокировать"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_columnWeight="1" />
+
+                        <Button android:id="@+id/btnCruiseOn" android:text="Круиз-контроль ВКЛ"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_columnWeight="1" />
+                        <Button android:id="@+id/btnCruiseOff" android:text="Круиз-контроль ВЫКЛ"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_columnWeight="1" />
+
+                        <Button android:id="@+id/btnLightOn" android:text="Свет ВКЛ"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_columnWeight="1" />
+                        <Button android:id="@+id/btnLightOff" android:text="Свет ВЫКЛ"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_columnWeight="1" />
+
+                        <Button android:id="@+id/btnGearDown" android:text="Передача ‒"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_columnWeight="1" />
+                        <Button android:id="@+id/btnGearUp" android:text="Передача +"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_columnWeight="1" />
+
+                        <Button android:id="@+id/btnQueryAll" android:text="Опросить статус (?)"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_columnWeight="1" android:layout_columnSpan="2" />
+                    </GridLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Ручная отправка (hex или текст с +PM>):" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/editManual"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="например A1B2C3D4E5F6" />
+
+                        <Button
+                            android:id="@+id/btnSend"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Отправить" />
+
+                        <Button
+                            android:id="@+id/btnSendCode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="CODE=" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Лог обмена:" />
+
+                    <TextView
+                        android:id="@+id/tvLog"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:textIsSelectable="true"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+            </ScrollView>
+        </LinearLayout>
+
+        <!-- ====================== ВКЛАДКА 2: ПРИБОРНАЯ ПАНЕЛЬ ====================== -->
+        <LinearLayout
+            android:id="@+id/tabDashboard"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="3">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Скорость, км/ч" />
+
+                    <TextView
+                        android:id="@+id/tvDashSpeed"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="—"
+                        android:textSize="36sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Батарея, %" />
+
+                    <TextView
+                        android:id="@+id/tvDashBattery"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="—"
+                        android:textSize="36sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Остаток, км" />
+
+                    <TextView
+                        android:id="@+id/tvDashRange"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="—"
+                        android:textSize="36sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#CCCCCC"
+                android:layout_marginVertical="12dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:text="Какое поле телеметрии чем является?" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textSize="12sp"
+                android:text="Мы не знаем заранее, как твой самокат называет скорость/батарею/остаток хода — выбери вручную из того, что реально пришло по Bluetooth (список ниже обновляется на лету). Как только нужные поля появятся во вкладке «Диагностика» → «Телеметрия», выбери их здесь." />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical">
+                <TextView android:layout_width="90dp" android:layout_height="wrap_content" android:text="Скорость:" />
+                <Spinner android:id="@+id/spinnerSpeedKey" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical">
+                <TextView android:layout_width="90dp" android:layout_height="wrap_content" android:text="Батарея:" />
+                <Spinner android:id="@+id/spinnerBatteryKey" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical">
+                <TextView android:layout_width="90dp" android:layout_height="wrap_content" android:text="Остаток, км:" />
+                <Spinner android:id="@+id/spinnerRangeKey" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textStyle="bold"
+                android:text="Все известные поля сейчас:" />
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+                <TextView
+                    android:id="@+id/tvDashRaw"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:textIsSelectable="true"
+                    android:textSize="12sp"
+                    android:text="(пока нет данных)" />
+            </ScrollView>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</LinearLayout>
