@@ -55,6 +55,10 @@ class MainActivity : AppCompatActivity() {
         // помещается только 20 байт, а команды протокола бывают длиннее.
         const val REQUESTED_MTU = 185
 
+        // Самокат отвечает примерно за 1 мс, но реальный цикл BLE (интервал соединения)
+        // занимает ~10-30 мс. Это страховочный таймаут, если CODE_NG не пришёл.
+        const val CODE_PROBE_TIMEOUT_MS = 50L
+
         // Кандидаты на команду гудка. В протоколе оригинального приложения Kugoo Kirin
         // команды гудка НЕТ, поэтому это подбор вслепую: только безопасные текстовые
         // команды вида "ключ=1"/"ключ=0" (самокат на неизвестные отвечает ERROR).
@@ -99,10 +103,6 @@ class MainActivity : AppCompatActivity() {
             "UNIT" to "+UNIT=?",
             "HLGT" to "HLGT=?",
         )
-
-        // Самокат отвечает примерно за 1 мс, но реальный цикл BLE (интервал соединения)
-        // занимает ~10-30 мс. Это страховочный таймаут, если CODE_NG не пришёл.
-        const val CODE_PROBE_TIMEOUT_MS = 50L
     }
 
     // ---- Общие элементы ----
@@ -247,13 +247,13 @@ class MainActivity : AppCompatActivity() {
     // ---- Подбор пароля CODE= по списку через запятую ----
     private var codeProbeList: List<String> = emptyList()
     private var codeProbeRunning = false
-    private var codeProbeAwaiting = false
     private var codeProbeIdx = -1
     private var codeProbeStepRunnable: Runnable? = null
     // 0 = перебор по введённому списку; N = перебор всех N-значных кодов (000..99..9) без ручного ввода
     private var codeProbeGenDigits = 0
     // С какого индекса начинать перебор (сохраняется, чтобы продолжить после остановки)
     private var codeProbeStart = 0
+    private var codeProbeAwaiting = false
 
     // ---- Проверка поддержки команд ----
     private var supportChecking = false
@@ -279,6 +279,8 @@ class MainActivity : AppCompatActivity() {
         tvStatus = findViewById(R.id.tvStatus)
         tvLog = findViewById(R.id.tvLog)
         // Метка сборки — чтобы по логу сразу видеть, актуальный ли APK установлен
+        // (меняй число при следующих правках подбора пароля, если снова будет непонятно,
+        // обновился ли APK после пересборки на GitHub Actions).
         log("Сборка: подбор пароля v4 (без паузы после NG, таймаут=50мс)")
         listDevices = findViewById(R.id.listDevices)
         btnScan = findViewById(R.id.btnScan)
@@ -1470,4 +1472,3 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
-
